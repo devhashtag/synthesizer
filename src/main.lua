@@ -1,74 +1,13 @@
 local graph = require('graph')
-
-local samplerate = 44100
-local bitcount = 8
-local channelcount = 1
-local buffercount = 2
-local buffersize = samplerate/10
-
-local qsource = love.audio.newQueueableSource(samplerate, bitcount, channelcount, buffercount)
-local buffer = love.sound.newSoundData(buffersize, samplerate, bitcount, channelcount)
-
-local sq_phase = 0
-local sq_frequency = 440
-local function square()
-    sq_phase = sq_phase + sq_frequency / samplerate
-
-    if sq_phase % 2 < 1 then
-        return -1
-    end
-
-    return 1
-end
-
-
-local tr_phase = 0
-local tr_frequency = 440
-
-local function og_triangle()
-    tr_phase = tr_phase + tr_frequency / samplerate
-
-    if tr_phase % 2 < 1 then
-        return 2 * (tr_phase % 2) - 1
-    end
-
-    return 1 - 2 * (tr_phase % 1)
-end
-
-local Oscillator = {
-    phase = 0,
-    frequency = 440,
-    samplerate = 44100,
-}
-
-function Oscillator:new(o)
-    o = o or {}
-    setmetatable(o, self)
-    self.__index = self
-    return o
-end
-
-function Oscillator:set_note(note)
-    self.frequency = 440.0 * 2^(note/12)
-end
-
-function Oscillator:sample()
-    self.phase = self.phase + (math.pi * 2 * self.frequency / self.samplerate)
-
-    return math.sin(self.phase)
-end
-
-local triangle = Oscillator:new()
-function triangle:sample()
-    self.phase = self.phase + (math.pi * 2 * self.frequency / self.samplerate)
-
-    return 4 * math.abs(self.phase - math.floor(self.phase+3/4) + 1/4) - 1
-end
-triangle.frequency = 440
-
+local Synth = require('synth')
+local Oscillator = require('oscillator')
 
 local sine = Oscillator:new()
-sine.frequency = 1
+sine.frequency = 440
+
+local synth = Synth:new()
+synth:init(sine)
+
 
 
 local function create_points(ggraph)
@@ -91,15 +30,8 @@ local function create_points(ggraph)
     ggraph.plot_points(points)
 end
 
-
 function love.update(dt)
-    while qsource:getFreeBufferCount() > 0 do
-        for i = 0, buffersize - 1 do
-            buffer:setSample(i, sine:sample())
-        end
-        qsource:queue(buffer)
-        -- qsource:play()
-    end
+    synth:update(dt)
 end
 
 function love.load()
