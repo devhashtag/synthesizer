@@ -12,13 +12,19 @@ Graph.points = nil
 -- Settings
 Graph.width = 0
 Graph.height = 0
-Graph.min_lines = 5
-Graph.max_lines = 10
+Graph.min_lines = 50
+Graph.max_lines = 100
 Graph.zoom_factor = 0.15
-Graph.nth_line = 4
+Graph.nth_line = 2
 
 -- Events
 Graph.viewport_changed = { }
+
+
+-- API
+function Graph:plot_points(points)
+    self.points = points
+end
 
 local function map(x, a1, b1, a2, b2)
     return a2 + (b2 - a2) * (x - a1) / (b1 - a1)
@@ -33,6 +39,7 @@ function Graph:y_s2c(y)
     return map(y, 0, self.height, self.ymax, self.ymin)
 end
 
+-- Cartesian coordinates to screen coordinates
 function Graph:x_c2s(x)
     return map(x, self.xmin, self.xmax, 0, self.width)
 end
@@ -45,9 +52,16 @@ function Graph:ratio()
     return self.height / self.width
 end
 
-function Graph:plot_points(points)
-    self.points = points
+local function round(x)
+    return math.floor(x + 0.5)
 end
+
+local function truncate(x, digits)
+    local mult = 10^(digits)
+
+    return math.modf(x*mult)/mult
+end
+
 
 function Graph:load()
     self.width = love.graphics.getWidth()
@@ -70,7 +84,6 @@ end
 function Graph:draw_axes()
     love.graphics.setLineStyle('smooth')
     love.graphics.setColor(1, 1, 1)
-
     love.graphics.line(0, self:y_c2s(0), self.width, self:y_c2s(0))
     love.graphics.line(self:x_c2s(0), 0, self:x_c2s(0), self.height)
 end
@@ -91,7 +104,7 @@ function Graph:draw_lines()
         love.graphics.setColor(1, 1, 1, 1)
         love.graphics.setLineStyle('smooth')
         love.graphics.print(tostring(x), self:x_c2s(x), self:y_c2s(0), 0, 1, 1, -3, -3)
-        x = x + n
+        x = truncate(x + n, 8)
     end
 
     local y = self.ymin
@@ -104,7 +117,7 @@ function Graph:draw_lines()
         love.graphics.setColor(1, 1, 1, 1)
         love.graphics.setLineStyle('smooth')
         love.graphics.print(tostring(y), self:x_c2s(0), self:y_c2s(y), 0, 1, 1, -3, -3)
-        y = y + n
+        y = truncate(y + n, 8)
     end
 
 end
@@ -157,6 +170,23 @@ end
 -- Event handling and navigation (translation, universal zoom)
 -- TODO: make zoom separate in both x- and y-direction
 
+function Graph:first_non_zero()
+    return tostring(self.nth_line):gsub('0', ''):gsub('%.', ''):sub(1, 1)
+end
+
+function Graph:decrease_lines()
+    local contains_two = '2' == self:first_non_zero()
+    local multiplier = contains_two and 2.5 or 2
+
+    self.nth_line = self.nth_line * multiplier
+end
+
+function Graph:increase_lines()
+    local contains_five = '5' == self:first_non_zero()
+    local multiplier = contains_five and 2.5 or 2
+
+    self.nth_line = self.nth_line / multiplier
+end
 
 function Graph:wheelmoved(horizontal, vertical)
     local x_s, y_s = love.mouse.getPosition()
@@ -164,6 +194,7 @@ function Graph:wheelmoved(horizontal, vertical)
     local rate_y = y_s / self.height
     local diff_x = (self.xmax - self.xmin) * self.zoom_factor
     local diff_y = (self.ymax - self.ymin) * self.zoom_factor
+    local pixels = self:x_c2s(self.nth_line) - self:x_c2s(0)
 
     -- zoom in (scroll up)
     if vertical > 0 then
@@ -173,9 +204,10 @@ function Graph:wheelmoved(horizontal, vertical)
         self.ymin = self.ymin + (1 - rate_y) * diff_y
         self.ymax = self.ymax - rate_y * diff_y
 
-        if math.floor((self.xmax - self.xmin) / self.nth_line) < self.min_lines then
-            self.nth_line = self.nth_line / 2
+        if pixels > self.max_lines then
+            self:increase_lines()
         end
+
     -- zoom out (scroll down)
     elseif vertical < 0 then
         self.xmin = self.xmin - rate_x * diff_x
@@ -184,8 +216,8 @@ function Graph:wheelmoved(horizontal, vertical)
         self.ymin = self.ymin - (1 - rate_y) * diff_y
         self.ymax = self.ymax + rate_y * diff_y
 
-        if math.floor((self.xmax - self.xmin) / self.nth_line) > self.max_lines then
-            self.nth_line = self.nth_line * 2
+        if pixels < self.min_lines then
+            self:decrease_lines()
         end
     end
 
