@@ -18,7 +18,7 @@ function Square:new(o)
 end
 
 function Square:sample()
-    return sign(self:sample())
+    return sign(getmetatable(self):sample())
 end
 
 

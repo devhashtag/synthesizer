@@ -9,7 +9,7 @@ local triangle = Triangle:new()
 local square = Square:new()
 
 local synth = Synth:new()
-synth:init(triangle)
+synth:init(square)
 
 
 
