@@ -1,12 +1,15 @@
 local graph = require('graph')
 local Synth = require('synth')
-local Oscillator = require('oscillator')
+local Oscillator = require('oscillators.oscillator')
+local Triangle = require('oscillators.triangle')
+local Square = require('oscillators.square')
 
 local sine = Oscillator:new()
-sine.frequency = 440
+local triangle = Triangle:new()
+local square = Square:new()
 
 local synth = Synth:new()
-synth:init(sine)
+synth:init(triangle)
 
 
 
