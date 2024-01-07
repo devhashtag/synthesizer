@@ -19,6 +19,10 @@ function Oscillator:update_phase()
     self.phase = self.phase + (math.pi * 2 * self.frequency / self.samplerate)
 end
 
+function Oscillator:sample_at(t)
+    return math.sin(2 * math.pi * self.frequency * t)
+end
+
 function Oscillator:sample()
     local phase = self.phase
 

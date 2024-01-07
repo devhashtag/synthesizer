@@ -3,43 +3,20 @@ local Synth = require('synth')
 local Oscillator = require('oscillators.oscillator')
 local Triangle = require('oscillators.triangle')
 local Square = require('oscillators.square')
-
-local sine = Oscillator:new()
-local triangle = Triangle:new()
-local square = Square:new()
+local Complex = require('oscillators.complex')
 
 local synth = Synth:new()
-synth:init(square)
 
+function love.load()
+    graph:load()
 
+    -- table.insert(graph.viewport_changed, sample_points())
 
-local function create_points(ggraph)
-    local xmax = ggraph.xmax
-    local points = { }
-    local i = 1
-
-    local ssine = Oscillator:new()
-    ssine.frequency = 1
-
-    while ssine.phase < xmax do
-        local point = { }
-        point.y = ssine:sample()
-        point.x = ssine.phase
-        points[i] = point
-
-        i = i + 1
-    end
-
-    ggraph.plot_points(points)
+    synth:init(Oscillator:new())
 end
 
 function love.update(dt)
     synth:update(dt)
-end
-
-function love.load()
-    graph:load()
-    --table.insert(graph.viewport_changed, create_points)
 end
 
 function love.draw()
@@ -55,7 +32,4 @@ function love.mousemoved(x, y, dx, dy, istouch)
 end
 
 function love.keypressed(key, scancode, isrepeat)
-    if key == 'f' then
-        create_points(graph)
-    end
 end

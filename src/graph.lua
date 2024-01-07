@@ -1,3 +1,5 @@
+local map = require('common').map
+local tern = require('common').tern
 local Graph = {}
 
 -- State
@@ -6,29 +8,29 @@ Graph.xmax = 10
 Graph.ymin = -10
 Graph.ymax = 10
 Graph.mode_translate = false
-
 Graph.points = nil
 
 -- Settings
 Graph.width = 0
 Graph.height = 0
-Graph.min_lines = 50
-Graph.max_lines = 100
-Graph.zoom_factor = 0.15
+Graph.min_gap = 50
+Graph.max_gap = 100
+Graph.zoom_factor = 0.05
+
 Graph.nth_line = 2
+Graph.x_gap = 2
+Graph.y_gap = 2
+
 
 -- Events
 Graph.viewport_changed = { }
-
 
 -- API
 function Graph:plot_points(points)
     self.points = points
 end
 
-local function map(x, a1, b1, a2, b2)
-    return a2 + (b2 - a2) * (x - a1) / (b1 - a1)
-end
+
 
 -- Screen coordinates to cartesian coordinates
 function Graph:x_s2c(x)
@@ -89,13 +91,14 @@ function Graph:draw_axes()
 end
 
 function Graph:draw_lines()
-    love.graphics.setColor(1, 1, 1, 0.5)
-    love.graphics.setLineStyle('rough')
+    self:draw_vertical_lines()
+    self:draw_horizontal_lines()
+end
 
-    local n = self.nth_line
+function Graph:draw_vertical_lines()
+    local n = self.x_gap
+    local x = math.floor(self.xmin / n) * n
 
-    local x = self.xmin
-    x = math.floor(x / n) * n
     while x < self.xmax do
         love.graphics.setColor(1, 1, 1, 0.5)
         love.graphics.setLineStyle('rough')
@@ -106,9 +109,12 @@ function Graph:draw_lines()
         love.graphics.print(tostring(x), self:x_c2s(x), self:y_c2s(0), 0, 1, 1, -3, -3)
         x = truncate(x + n, 8)
     end
+end
 
-    local y = self.ymin
-    y = math.floor(y / n) * n
+function Graph:draw_horizontal_lines()
+    local n = self.y_gap
+    local y = math.floor(self.ymin / n) * n
+
     while y < self.ymax do
         love.graphics.setColor(1, 1, 1, 0.5)
         love.graphics.setLineStyle('rough')
@@ -119,7 +125,6 @@ function Graph:draw_lines()
         love.graphics.print(tostring(y), self:x_c2s(0), self:y_c2s(y), 0, 1, 1, -3, -3)
         y = truncate(y + n, 8)
     end
-
 end
 
 -- The points constitute the actual graph
@@ -133,7 +138,6 @@ function Graph:draw_points()
     love.graphics.setColor(1, 0, 0)
 
     local arguments = { }
-
     local i = 1
 
     for _, point in ipairs(self.points) do
@@ -145,80 +149,117 @@ function Graph:draw_points()
 
     love.graphics.points(arguments)
 
+    -- Draw lines between the poitns
+    -- disabled until its useful
     if false then
         local prev_point = nil
         for _, point in ipairs(self.points) do
-            if prev_point == nil then
-                goto continue
+            if prev_point ~= nil then
+                love.graphics.line(
+                    self:x_c2s(prev_point.x),
+                    self:y_c2s(prev_point.y),
+                    self:x_c2s(point.x),
+                    self:y_c2s(point.y))
             end
 
-            love.graphics.line(
-                self:x_c2s(prev_point.x),
-                self:y_c2s(prev_point.y),
-                self:x_c2s(point.x),
-                self:y_c2s(point.y))
-
-
-            ::continue::
             prev_point = point
         end
     end
-
 end
 
 
 -- Event handling and navigation (translation, universal zoom)
 -- TODO: make zoom separate in both x- and y-direction
 
-function Graph:first_non_zero()
-    return tostring(self.nth_line):gsub('0', ''):gsub('%.', ''):sub(1, 1)
+function Graph:x_first_non_zero()
+   return tostring(self.x_gap):gsub('0', ''):gsub('%.', ''):sub(1, 1)
+end
+
+function Graph:y_first_non_zero()
+   return tostring(self.y_gap):gsub('0', ''):gsub('%.', ''):sub(1, 1)
 end
 
 function Graph:decrease_lines()
-    local contains_two = '2' == self:first_non_zero()
-    local multiplier = contains_two and 2.5 or 2
+    local pixels_x = self:x_c2s(self.x_gap) - self:x_c2s(0)
+    local pixels_y = self:y_c2s(0) - self:y_c2s(self.y_gap)
 
-    self.nth_line = self.nth_line * multiplier
+    if pixels_x < self.min_gap then
+        local contains_two = '2' == self:x_first_non_zero()
+        local multiplier = tern(contains_two, 2.5, 2)
+
+        self.x_gap = self.x_gap * multiplier
+    end
+
+    if pixels_y < self.min_gap then
+        local contains_two = '2' == self:y_first_non_zero()
+        local multiplier = tern(contains_two, 2.5, 2)
+
+        self.y_gap = self.y_gap * multiplier
+    end
 end
 
 function Graph:increase_lines()
-    local contains_five = '5' == self:first_non_zero()
-    local multiplier = contains_five and 2.5 or 2
+    local pixels_x = self:x_c2s(self.x_gap) - self:x_c2s(0)
+    local pixels_y = self:y_c2s(0) - self:y_c2s(self.y_gap)
 
-    self.nth_line = self.nth_line / multiplier
+    if pixels_x > self.max_gap then
+        local contains_five = '5' == self:x_first_non_zero()
+        local multiplier = tern(contains_five, 2.5, 2)
+
+        self.x_gap = self.x_gap / multiplier
+    end
+
+    if pixels_y > self.max_gap then
+        local contains_five = '5' == self:y_first_non_zero()
+        local multiplier = tern(contains_five, 2.5, 2)
+
+        self.y_gap = self.y_gap / multiplier
+    end
 end
 
 function Graph:wheelmoved(horizontal, vertical)
+    -- Screen coordinates of mouse pointer
     local x_s, y_s = love.mouse.getPosition()
-    local rate_x = x_s / self.width
-    local rate_y = y_s / self.height
+
+    -- Normalized zoom target (still in screen coordinates)
+    local target_x = x_s / self.width
+    local target_y = y_s / self.height
+
+    -- change the viewport by this much units (in cartesian coordinates)
     local diff_x = (self.xmax - self.xmin) * self.zoom_factor
     local diff_y = (self.ymax - self.ymin) * self.zoom_factor
-    local pixels = self:x_c2s(self.nth_line) - self:x_c2s(0)
+
+
+    -- whether to apply zoom
+    local zoom_x = true
+    local zoom_y = not love.keyboard.isDown('lshift')
 
     -- zoom in (scroll up)
     if vertical > 0 then
-        self.xmin = self.xmin + rate_x * diff_x
-        self.xmax = self.xmax - (1 - rate_x) * diff_x
-
-        self.ymin = self.ymin + (1 - rate_y) * diff_y
-        self.ymax = self.ymax - rate_y * diff_y
-
-        if pixels > self.max_lines then
-            self:increase_lines()
+        if zoom_x then
+            self.xmin = self.xmin + target_x * diff_x
+            self.xmax = self.xmax - (1 - target_x) * diff_x
         end
 
+        if zoom_y then
+            self.ymin = self.ymin + (1 - target_y) * diff_y
+            self.ymax = self.ymax - target_y * diff_y
+        end
+
+        self:increase_lines()
     -- zoom out (scroll down)
     elseif vertical < 0 then
-        self.xmin = self.xmin - rate_x * diff_x
-        self.xmax = self.xmax + (1 - rate_x) * diff_x
-
-        self.ymin = self.ymin - (1 - rate_y) * diff_y
-        self.ymax = self.ymax + rate_y * diff_y
-
-        if pixels < self.min_lines then
-            self:decrease_lines()
+        if zoom_x then
+            self.xmin = self.xmin - target_x * diff_x
+            self.xmax = self.xmax + (1 - target_x) * diff_x
         end
+
+        if zoom_y then
+            self.ymin = self.ymin - (1 - target_y) * diff_y
+            self.ymax = self.ymax + target_y * diff_y
+        end
+
+        self:decrease_lines()
     end
 
     self:notify(self.viewport_changed)
@@ -244,6 +285,14 @@ function Graph:notify(listeners)
     for _, listener in ipairs(listeners) do
         listener(self)
     end
+end
+
+-- Use case
+
+function Graph:graph_oscillator(oscillator)
+    local min = self.xmin
+
+
 end
 
 return Graph
