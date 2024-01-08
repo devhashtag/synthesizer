@@ -38,19 +38,35 @@ function love.keypressed(key)
     local osc = Oscillator:new()
 
     if key == 'a' then
+        osc:set_note(-5)
+    elseif key == 'w' then
         osc:set_note(-4)
     elseif key == 's' then
         osc:set_note(-3)
-    elseif key == 'd' then
+    elseif key == 'e' then
         osc:set_note(-2)
-    elseif key == 'f' then
+    elseif key == 'd' then
         osc:set_note(-1)
-    elseif key == 'g' then
+    elseif key == 'f' then
         osc:set_note(0)
-    elseif key == 'h' then
+    elseif key == 't' then
         osc:set_note(1)
-    elseif key == 'j' then
+    elseif key == 'g' then
         osc:set_note(2)
+    elseif key == 'y' then
+        osc:set_note(3)
+    elseif key == 'h' then
+        osc:set_note(4)
+    elseif key == 'j' then
+        osc:set_note(5)
+    elseif key == 'i' then
+        osc:set_note(6)
+    elseif key == 'k' then
+        osc:set_note(7)
+    elseif key == 'o' then
+        osc:set_note(8)
+    elseif key == 'l' then
+        osc:set_note(9)
     else
         return
     end

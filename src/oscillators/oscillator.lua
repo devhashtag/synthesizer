@@ -24,8 +24,6 @@ function Oscillator:sample()
 
     self.n_sample = self.n_sample + 1
 
-    print(self:sample_at(t))
-
     return self:sample_at(t)
 end
 

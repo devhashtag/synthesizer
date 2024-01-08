@@ -10,8 +10,6 @@ end
 
 function Buffer:set_buffer(buffer)
     self.buffer = buffer
-
-    print(#self.buffer)
 end
 
 function Buffer:sample()

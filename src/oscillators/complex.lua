@@ -12,10 +12,6 @@ function Complex:add_oscillator(oscillator)
     self.counter = self.counter + 1
     self.oscillators[self.counter] = oscillator
 
-    for _, osc in pairs(self.oscillators) do
-        print(osc.frequency)
-    end
-
     return self.counter
 end
 
