@@ -2,38 +2,49 @@ local Oscillator = require('oscillators.oscillator')
 local Complex = Oscillator:new()
 
 function Complex:new(o)
-    o = o or { oscillators = {} }
+    o = o or { counter = 0, oscillators = {} }
     setmetatable(o, self)
     self.__index = self
     return o
 end
 
 function Complex:add_oscillator(oscillator)
-    table.insert(self.oscillators, oscillator)
+    self.counter = self.counter + 1
+    self.oscillators[self.counter] = oscillator
+
+    for _, osc in pairs(self.oscillators) do
+        print(osc.frequency)
+    end
+
+    return self.counter
+end
+
+function Complex:remove_oscillator(id)
+    self.oscillators[id] = nil
 end
 
 function Complex:sample_at(t)
     local total = 0
+    local n = 0
 
-    for _, oscillator in ipairs(self.oscillators) do
+    for _, oscillator in pairs(self.oscillators) do
         total = total + oscillator:sample_at(t)
+        n = n + 1
     end
 
-    return total
+    return total / n
 end
 
 function Complex:sample()
     local total = 0
+    local n = 0
 
-    for _, oscillator in ipairs(self.oscillators) do
-        local sample = oscillator:sample()
-
-        total = total + sample
+    for _, oscillator in pairs(self.oscillators) do
+        total = total + oscillator:sample()
+        n = n + 1
     end
 
-    self.n_sample = self.n_sample + 1
-
-    return total / #self.oscillators
+    return total / n
 end
 
 return Complex

@@ -22,4 +22,14 @@ function common.truncate(x, digits)
     return math.modf(x*mult)/mult
 end
 
+-- TODO test bounds
+function common.create_buffer(osc, length)
+    local buffer = { }
+    for i = 0, length-1 do
+        table.insert(buffer, i, osc:sample())
+    end
+
+    return buffer
+end
+
 return common

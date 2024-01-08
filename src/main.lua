@@ -7,26 +7,11 @@ local Square = require('oscillators.square')
 local Buffer = require('oscillators.buffer')
 
 local synth = Synth:new()
+local complex = Complex:new()
+local active_notes = { }
 
-local function create_buffer(osc, length)
-    local buffer = { }
-    local n = 0
-
-    while n <= length do
-        table.insert(buffer, n, osc:sample())
-
-        n = n + 1
-    end
-
-    return buffer
-end
 
 function love.load()
-    local complex = Complex:new()
-
-    complex:add_oscillator(Oscillator:new())
-    complex:add_oscillator(Oscillator:new({ frequency = 550 }))
-
     graph:load()
     graph:set_oscillator(complex)
 
@@ -47,4 +32,37 @@ end
 
 function love.mousemoved(x, y, dx, dy, istouch)
     graph:mousemoved(x, y, dx, dy, istouch)
+end
+
+function love.keypressed(key)
+    local osc = Oscillator:new()
+
+    if key == 'a' then
+        osc:set_note(-4)
+    elseif key == 's' then
+        osc:set_note(-3)
+    elseif key == 'd' then
+        osc:set_note(-2)
+    elseif key == 'f' then
+        osc:set_note(-1)
+    elseif key == 'g' then
+        osc:set_note(0)
+    elseif key == 'h' then
+        osc:set_note(1)
+    elseif key == 'j' then
+        osc:set_note(2)
+    else
+        return
+    end
+    local id = complex:add_oscillator(osc)
+    active_notes[key] = id
+end
+
+function love.keyreleased(key)
+    if active_notes[key] == nil then
+        return
+    end
+
+    complex:remove_oscillator(active_notes[key])
+    active_notes[key] = nil
 end
