@@ -9,14 +9,9 @@ function Triangle:new(o)
     return o
 end
 
-function Triangle:sample()
-    local phase = self.phase
-    local a = phase / (2 * math.pi)
-
-    self:update_phase()
-
-    return 2 * math.abs(2 * (a - math.floor(a + 0.5))) - 1
-    -- return 4 * math.abs(phase - math.floor(phase+3/4) + 1/4) - 1
+function Triangle:sample_at(t)
+    t = t * self.frequency
+    return 2 * math.abs(2 * (t + 0.25 - math.floor(t + 0.75))) - 1
 end
 
 return Triangle

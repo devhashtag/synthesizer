@@ -8,18 +8,32 @@ function Complex:new(o)
     return o
 end
 
-function Complex:addOscillator(oscillator)
+function Complex:add_oscillator(oscillator)
     table.insert(self.oscillators, oscillator)
+end
+
+function Complex:sample_at(t)
+    local total = 0
+
+    for _, oscillator in ipairs(self.oscillators) do
+        total = total + oscillator:sample_at(t)
+    end
+
+    return total
 end
 
 function Complex:sample()
     local total = 0
 
     for _, oscillator in ipairs(self.oscillators) do
-        total = total + oscillator:sample()
+        local sample = oscillator:sample()
+
+        total = total + sample
     end
 
-    return total
+    self.n_sample = self.n_sample + 1
+
+    return total / #self.oscillators
 end
 
 return Complex

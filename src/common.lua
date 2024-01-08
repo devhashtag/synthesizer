@@ -12,4 +12,14 @@ function common.tern(condition, trew, fallse)
     return condition and trew or fallse
 end
 
+function common.round(x)
+    return math.floor(x + 0.5)
+end
+
+function common.truncate(x, digits)
+    local mult = 10^(digits)
+
+    return math.modf(x*mult)/mult
+end
+
 return common

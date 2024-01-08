@@ -1,7 +1,7 @@
 local Oscillator = {
-    phase = 0,
+    n_sample = 0,
     frequency = 440,
-    samplerate = 44100,
+    samplerate = 44100
 }
 
 function Oscillator:new(o)
@@ -15,20 +15,16 @@ function Oscillator:set_note(note)
     self.frequency = 440.0 * 2^(note/12)
 end
 
-function Oscillator:update_phase()
-    self.phase = self.phase + (math.pi * 2 * self.frequency / self.samplerate)
-end
-
 function Oscillator:sample_at(t)
     return math.sin(2 * math.pi * self.frequency * t)
 end
 
 function Oscillator:sample()
-    local phase = self.phase
+    local t = self.n_sample / self.samplerate
 
-    self:update_phase()
+    self.n_sample = self.n_sample + 1
 
-    return math.sin(phase)
+    return self:sample_at(t)
 end
 
 

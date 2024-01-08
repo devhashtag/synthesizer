@@ -1,5 +1,7 @@
 local map = require('common').map
 local tern = require('common').tern
+local truncate = require('common').truncate
+
 local Graph = {}
 
 -- State
@@ -14,23 +16,31 @@ Graph.points = nil
 Graph.width = 0
 Graph.height = 0
 Graph.min_gap = 50
-Graph.max_gap = 100
+Graph.max_gap = 200  -- TODO write warning if difference between min_gap and max_gap is too small
 Graph.zoom_factor = 0.05
+Graph.max_points = 25000 -- How many points can be shown at once
+Graph.oscillator = nil
 
 Graph.nth_line = 2
 Graph.x_gap = 2
 Graph.y_gap = 2
 
-
 -- Events
 Graph.viewport_changed = { }
 
 -- API
-function Graph:plot_points(points)
+function Graph:set_points(points)
     self.points = points
 end
 
+function Graph:set_oscillator(oscillator)
+    self.oscillator = oscillator
 
+    local width = (2 / oscillator.frequency)
+    local padding = 0.1 * width
+
+    self:set_viewport(0 - padding, width + padding, -1.1, 1.1)
+end
 
 -- Screen coordinates to cartesian coordinates
 function Graph:x_s2c(x)
@@ -54,22 +64,21 @@ function Graph:ratio()
     return self.height / self.width
 end
 
-local function round(x)
-    return math.floor(x + 0.5)
+function Graph:x_gaps()
+    return self:x_c2s(self.x_gap) - self:x_c2s(0)
 end
 
-local function truncate(x, digits)
-    local mult = 10^(digits)
-
-    return math.modf(x*mult)/mult
+function Graph:y_gaps()
+    return self:y_c2s(self.y_gap) - self:y_c2s(0)
 end
-
 
 function Graph:load()
     self.width = love.graphics.getWidth()
     self.height = love.graphics.getHeight()
     self.ymin = self.xmin * (self.height / self.width)
     self.ymax = self.xmax * (self.height / self.width)
+
+    table.insert(self.viewport_changed, self.graph_oscillator)
 end
 
 function Graph:draw()
@@ -78,6 +87,7 @@ function Graph:draw()
     self:draw_axes()
     self:draw_lines()
     self:draw_points()
+    self:draw_oscillator()
 end
 
 -- This will draw the layout of the graph,
@@ -277,6 +287,7 @@ function Graph:mousemoved(x, y, dx, dy, istouch)
         self.ymin = self.ymin - dy / y_pixels_per_unit
         self.ymax = self.ymax - dy / y_pixels_per_unit
 
+
         self:notify(self.viewport_changed)
     end
 end
@@ -287,12 +298,33 @@ function Graph:notify(listeners)
     end
 end
 
+function Graph:set_viewport(xmin, xmax, ymin, ymax)
+    self.xmin = xmin
+    self.xmax = xmax
+    self.ymin = ymin
+    self.ymax = ymax
+
+    while self:x_gaps() + self:y_gaps() > 2 * self.max_gap do
+        self:increase_lines()
+    end
+end
+
 -- Use case
 
-function Graph:graph_oscillator(oscillator)
-    local min = self.xmin
+function Graph:draw_oscillator()
+    if self.oscillator == nil then
+        return
+    end
 
+    love.graphics.setColor(1, 0, 0 , 1)
 
+    local n = (self.xmax - self.xmin) / (self.max_points)
+    local x = self.xmin
+    while x < self.xmax do
+        local y = self.oscillator:sample_at(x)
+        love.graphics.circle('fill', self:x_c2s(x), self:y_c2s(y), 1)
+        x = x + n
+    end
 end
 
 return Graph

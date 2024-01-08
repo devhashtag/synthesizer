@@ -10,9 +10,8 @@ function Square:new(o)
     return o
 end
 
-function Square:sample()
-    return sign(getmetatable(self):sample())
+function Square:sample_at(t)
+    return sign(getmetatable(self):sample_at(t)) -- TODO make this a square wave
 end
-
 
 return Square
