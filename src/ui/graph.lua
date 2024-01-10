@@ -4,7 +4,7 @@ local map = require('common').map
 local tern = require('common').tern
 local truncate = require('common').truncate
 
-local Graph = Window:new()
+local Graph = {}
 
 -- State
 Graph.xmin = -10
@@ -30,6 +30,14 @@ Graph.viewport_changed = { }
 
 -- Make it an instance of Window
 Window:new(Graph)
+
+-- Make it instantiable
+function Graph:new(o)
+    o = o or { }
+    setmetatable(o, self)
+    self.__index = self
+    return o
+end
 
 -- API
 function Graph:set_points(points)
@@ -238,6 +246,13 @@ function Graph:wheelmoved(horizontal, vertical)
     -- Screen coordinates of mouse pointer
     local x_s, y_s = love.mouse.getPosition()
 
+    if not self:in_content(x_s, y_s) then
+        return
+    end
+
+    x_s = x_s - self.x
+    y_s = y_s - self.y
+
     -- Normalized zoom target (still in screen coordinates)
     local target_x = x_s / self.width
     local target_y = y_s / self.height
@@ -284,6 +299,10 @@ end
 
 
 function Graph:mousemoved(x, y, dx, dy, istouch)
+    if not self:in_content(x, y) then
+        return
+    end
+
     if self.mode_translate then
         local x_pixels_per_unit = self.width / (self.xmax - self.xmin)
         local y_pixels_per_unit = self.height / (self.ymin - self.ymax)
