@@ -32,4 +32,31 @@ function common.create_buffer(osc, length)
     return buffer
 end
 
+
+-- Multiple inheritance system
+local function search(property, metatables)
+    for i=1, #metatables do
+        local value = metatables[i][property]
+        if value then return value end
+    end
+end
+
+function common.create_class(...)
+    local class = {}
+
+    setmetatable(class, {__index=function(_, k)
+        return search(k, arg)
+    end})
+
+    class.__index = class
+
+    function class:new(o)
+        o = o or {}
+        setmetatable(o, class)
+        return o
+    end
+
+    return class
+end
+
 return common

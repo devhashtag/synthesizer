@@ -1,7 +1,8 @@
+local Window = require('ui.window')
+
 local map = require('common').map
 local tern = require('common').tern
 local truncate = require('common').truncate
-local Window = require('ui.window')
 
 local Graph = Window:new()
 
@@ -14,8 +15,6 @@ Graph.mode_translate = false
 Graph.points = nil
 
 -- Settings
-Graph.width = 0
-Graph.height = 0
 Graph.min_gap = 50
 Graph.max_gap = 200  -- TODO write warning if difference between min_gap and max_gap is too small
 Graph.zoom_factor = 0.05
@@ -28,6 +27,9 @@ Graph.y_gap = 2
 
 -- Events
 Graph.viewport_changed = { }
+
+-- Make it an instance of Window
+Window:new(Graph)
 
 -- API
 function Graph:set_points(points)
@@ -74,16 +76,16 @@ function Graph:y_gaps()
     return self:y_c2s(self.y_gap) - self:y_c2s(0)
 end
 
-function Graph:load()
-    self:set_size(love.graphics.getWidth(), love.graphics.getHeight())
-    table.insert(self.viewport_changed, self.graph_oscillator)
-end
-
 function Graph:set_size(width, height)
-    getmetatable(self).set_size(width, height)
+    Window:set_size(width, height)
 
     self.ymin = self.xmin * (self.height / self.width)
     self.ymax = self.xmax * (self.height / self.width)
+end
+
+function Graph:load()
+    self:set_size(love.graphics.getWidth(), love.graphics.getHeight())
+    table.insert(self.viewport_changed, self.graph_oscillator)
 end
 
 function Graph:draw()

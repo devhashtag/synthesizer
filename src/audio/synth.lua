@@ -39,7 +39,6 @@ function Synth:update(dt)
         self.qsource:queue(self.buffer)
         self.qsource:play()
     end
-
 end
 
 return Synth

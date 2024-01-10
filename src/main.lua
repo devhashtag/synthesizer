@@ -1,84 +1,49 @@
-local graph = require('graph')
-local Synth = require('synth')
-local Oscillator = require('oscillators.oscillator')
-local Complex = require('oscillators.complex')
-local Triangle = require('oscillators.triangle')
-local Square = require('oscillators.square')
-local Buffer = require('oscillators.buffer')
+local WIDTH = 800
+local HEIGHT = 500
 
-local synth = Synth:new()
-local complex = Complex:new()
-local active_notes = { }
 
+local WindowManager = require('ui.manager')
+local KeyboardSynth = require('audio.keyboard_synth')
+local Graph = require('ui.graph')
+
+
+-- List of all tables that will be notified of events
+local event_listeners = { Graph, KeyboardSynth, WindowManager }
+
+-- Function that calls every table in event_listeners on every event
+setmetatable(love, {__index = function(_, k)
+    return function(...)
+        local arg = {...}
+
+        for _, tab in ipairs(event_listeners) do
+            if type(tab[k]) == 'function' then
+                tab[k](tab, unpack(arg))
+            end
+        end
+    end
+end})
 
 function love.load()
-    graph:load()
-    graph:set_oscillator(complex)
+    love.window.setMode(WIDTH, HEIGHT, {resizable=true})
 
-    synth:init(complex)
+    WindowManager.width = WIDTH
+    WindowManager.height = HEIGHT
+
+
+    Graph:load()
+
+    KeyboardSynth:init()
+    Graph:set_oscillator(KeyboardSynth.oscillator)
+
+    WindowManager:add(Graph)
 end
 
 function love.update(dt)
-    synth:update(dt)
+    KeyboardSynth:update(dt)
+
+    WindowManager:update()
 end
 
 function love.draw()
-    graph:draw()
-end
-
-function love.wheelmoved(horizontal, vertical)
-    graph:wheelmoved(horizontal, vertical)
-end
-
-function love.mousemoved(x, y, dx, dy, istouch)
-    graph:mousemoved(x, y, dx, dy, istouch)
-end
-
-function love.keypressed(key)
-    local osc = Oscillator:new()
-
-    if key == 'a' then
-        osc:set_note(-5)
-    elseif key == 'w' then
-        osc:set_note(-4)
-    elseif key == 's' then
-        osc:set_note(-3)
-    elseif key == 'e' then
-        osc:set_note(-2)
-    elseif key == 'd' then
-        osc:set_note(-1)
-    elseif key == 'f' then
-        osc:set_note(0)
-    elseif key == 't' then
-        osc:set_note(1)
-    elseif key == 'g' then
-        osc:set_note(2)
-    elseif key == 'y' then
-        osc:set_note(3)
-    elseif key == 'h' then
-        osc:set_note(4)
-    elseif key == 'j' then
-        osc:set_note(5)
-    elseif key == 'i' then
-        osc:set_note(6)
-    elseif key == 'k' then
-        osc:set_note(7)
-    elseif key == 'o' then
-        osc:set_note(8)
-    elseif key == 'l' then
-        osc:set_note(9)
-    else
-        return
-    end
-    local id = complex:add_oscillator(osc)
-    active_notes[key] = id
-end
-
-function love.keyreleased(key)
-    if active_notes[key] == nil then
-        return
-    end
-
-    complex:remove_oscillator(active_notes[key])
-    active_notes[key] = nil
+    WindowManager:draw()
 end
