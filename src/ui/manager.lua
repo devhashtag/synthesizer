@@ -44,8 +44,9 @@ function WindowManager:mousemoved(x, y, dx, dy, istouch)
     end
 
     if self._resize then
-        self._resize.width = self._resize.width + dx
-        self._resize.height = self._resize.height + dy
+        self._resize:set_inner_size(
+            math.max(constants.MIN_WINDOW_SIZE, self._resize.width + dx),
+            math.max(constants.MIN_WINDOW_SIZE, self._resize.height + dy))
     end
 end
 
@@ -56,19 +57,22 @@ function WindowManager:draw()
             return
         end
 
-        love.graphics.translate(window.x, window.y + constants.BAR_HEIGHT)
+        love.graphics.translate(window.x, window.y)
         self:draw_border(window)
+        love.graphics.translate(constants.BORDER_THICKNESS, constants.BAR_HEIGHT)
         love.graphics.setScissor(window.x + constants.BORDER_THICKNESS, window.y + constants.BAR_HEIGHT, window.width, window.height)
         window:draw()
         love.graphics.setScissor()
-        love.graphics.translate(-window.x, -window.y - constants.BAR_HEIGHT)
+        love.graphics.translate(-window.x - constants.BORDER_THICKNESS, -window.y - constants.BAR_HEIGHT)
     end
 end
 
 function WindowManager:draw_border(window)
     love.graphics.setColor(1, 1, 1, 1)
-    love.graphics.rectangle('line', 0, -constants.BAR_HEIGHT, window.width, window.height + constants.BAR_HEIGHT)
-    love.graphics.rectangle('fill', 0, -constants.BAR_HEIGHT, window.width, constants.BAR_HEIGHT)
+    love.graphics.rectangle('fill', 0, 0, window.outer_width, constants.BAR_HEIGHT)
+    love.graphics.rectangle('fill', 0, 0, constants.BORDER_THICKNESS, window.outer_height)
+    love.graphics.rectangle('fill', window.outer_width - constants.BORDER_THICKNESS, 0, constants.BORDER_THICKNESS, window.outer_height)
+    love.graphics.rectangle('fill', 0, window.outer_height - constants.BORDER_THICKNESS, window.outer_width, constants.BORDER_THICKNESS)
 end
 
 function WindowManager:in_bounds(window)
@@ -83,5 +87,21 @@ function WindowManager:in_bounds(window)
     return true
 end
 
+function WindowManager:keypressed(key)
+    if key == 'r' then
+        for _, window in ipairs(self.windows) do
+            if not self:in_bounds(window) then
+                window.x = 100
+                window.y = 100
+                break
+            end
+        end
+    end
+end
+
+function WindowManager:resize()
+    self.width = love.graphics.getWidth()
+    self.height = love.graphics.getHeight()
+end
 
 return WindowManager

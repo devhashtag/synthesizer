@@ -1,7 +1,6 @@
 local WIDTH = 800
 local HEIGHT = 500
 
-
 local WindowManager = require('ui.manager')
 local KeyboardSynth = require('audio.keyboard_synth')
 local Graph = require('ui.graph')
@@ -13,6 +12,7 @@ local right = Graph:new()
 
 -- List of all tables that will be notified of events
 local event_listeners = { left, right, KeyboardSynth, WindowManager }
+
 
 -- Function that calls every table in event_listeners on every event
 setmetatable(love, {__index = function(_, k)
@@ -32,6 +32,9 @@ function love.load()
 
     WindowManager.width = WIDTH
     WindowManager.height = HEIGHT
+
+    left:load()
+    right:load()
 
     left:set_size(love.graphics.getWidth() / 2 - 50, love.graphics.getHeight())
     right:set_size(love.graphics.getWidth() / 2 - 50, love.graphics.getHeight())

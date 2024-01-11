@@ -1,3 +1,4 @@
+local constants = require('constants.ui')
 local Window = require('ui.window')
 
 local map = require('common').map
@@ -85,14 +86,13 @@ function Graph:y_gaps()
 end
 
 function Graph:set_size(width, height)
-    Window:set_size(width, height)
+    Window.set_size(self, width, height)
 
-    self.ymin = self.xmin * (self.height / self.width)
-    self.ymax = self.xmax * (self.height / self.width)
+    --self.ymin = self.xmin * (self.height / self.width)
+    --self.ymax = self.xmax * (self.height / self.width)
 end
 
 function Graph:load()
-    self:set_size(love.graphics.getWidth(), love.graphics.getHeight())
     table.insert(self.viewport_changed, self.graph_oscillator)
 end
 
