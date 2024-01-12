@@ -5,7 +5,7 @@ local map = require('common').map
 local tern = require('common').tern
 local truncate = require('common').truncate
 
-local Graph = {}
+local Graph = Window:new()
 
 -- State
 Graph.xmin = -10
@@ -28,17 +28,6 @@ Graph.y_gap = 2
 
 -- Events
 Graph.viewport_changed = { }
-
--- Make it an instance of Window
-Window:new(Graph)
-
--- Make it instantiable
-function Graph:new(o)
-    o = o or { }
-    setmetatable(o, self)
-    self.__index = self
-    return o
-end
 
 -- API
 function Graph:set_points(points)

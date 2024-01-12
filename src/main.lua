@@ -8,11 +8,10 @@ local Oscillator = require('oscillators.oscillator')
 local osc = require('ui.components.oscillator'):new()
 
 local left = Graph:new()
-local right = Graph:new()
 
 
 -- List of all tables that will be notified of events
-local event_listeners = { left, right, KeyboardSynth, WindowManager }
+local event_listeners = { left, KeyboardSynth, WindowManager }
 
 
 -- Function that calls every table in event_listeners on every event
@@ -38,18 +37,13 @@ function love.load()
     osc:set_size(200, 300)
 
     left:load()
-    right:load()
-
     left:set_size(love.graphics.getWidth() / 2 - 50, love.graphics.getHeight())
-    right:set_size(love.graphics.getWidth() / 2 - 50, love.graphics.getHeight())
-    right.x = love.graphics.getWidth() / 2 + 25
+    print('hey')
 
     KeyboardSynth:init()
     left:set_oscillator(KeyboardSynth.oscillator)
-    right:set_oscillator(Oscillator:new())
 
-    --WindowManager:add(left)
-    --WindowManager:add(right)
+    WindowManager:add(left)
     WindowManager:add(osc)
 end
 

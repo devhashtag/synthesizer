@@ -1,17 +1,12 @@
-Text = {}
+local Object = require('oop.object')
+
+Text = Object:new()
 Text.x = 0
 Text.y = 0
 Text.text = ''
 Text.font = love.graphics.getFont()
 Text.width = nil
 Text.padding = 5
-
-function Text:new(o)
-    o = o or {}
-    setmetatable(o, self)
-    self.__index = self
-    return o
-end
 
 function Text:draw()
     local height = self.font:getHeight()

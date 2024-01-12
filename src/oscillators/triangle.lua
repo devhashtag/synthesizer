@@ -1,5 +1,5 @@
-local oscillator = require('oscillators.oscillator')
-local Triangle = oscillator:new()
+local Oscillator = require('oscillators.oscillator')
+local Triangle = Oscillator:new()
 
 function Triangle:sample_at(t)
     t = t * self.frequency

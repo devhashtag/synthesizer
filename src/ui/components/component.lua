@@ -1,15 +1,8 @@
 local Window = require('ui.window')
 
 Component = Window:new()
-Component.outputs = {}
 Component.inputs = {}
-
-function Component:new(inputs, outputs)
-    local o = {inputs=inputs, outputs=outputs}
-    setmetatable(o, self)
-    self.__index = self
-    return o
-end
+Component.outputs = {}
 
 function Component:create_output(output)
     return function()

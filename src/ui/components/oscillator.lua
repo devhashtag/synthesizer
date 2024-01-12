@@ -1,17 +1,10 @@
 local Component = require('ui.components.component')
-local Text = require('ui.elements.text')
 local Oscillator = require('oscillators.oscillator')
-local OscillatorComponent = Component:new({}, {})
+local Text = require('ui.elements.text')
+local OscillatorComponent = Component:new()
 
 OscillatorComponent.text = Text:new()
 OscillatorComponent.oscillator = Oscillator:new()
-
-function OscillatorComponent:new(o)
-    o = o or {}
-    setmetatable(o, self)
-    self.__index = self
-    return o
-end
 
 function OscillatorComponent:draw()
     Component:draw()

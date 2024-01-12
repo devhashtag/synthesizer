@@ -1,17 +1,9 @@
 local Object = require('oop.object')
+local Oscillator = Object:new()
 
-local Oscillator = {
-    n_sample = 0,
-    frequency = 440,
-    samplerate = 44100
-}
-
-function Oscillator:new(o)
-    o = o or {}
-    setmetatable(o, self)
-    self.__index = self
-    return o
-end
+Oscillator.n_sample = 0
+Oscillator.frequency = 440
+Oscillator.samplerate = 4410
 
 function Oscillator:set_note(note)
     self.frequency = 440.0 * 2^(note/12)
@@ -28,6 +20,5 @@ function Oscillator:sample()
 
     return self:sample_at(t)
 end
-
 
 return Oscillator

@@ -1,21 +1,15 @@
 local constants = require('constants.ui')
+local Object = require('oop.object')
 
 -- A window that can be displayed
-local Window = {
-    x=0,
-    y=0,
-    width=0,
-    height=0,
-    outer_width=0,
-    outer_height=0
-}
+local Window = Object:new()
 
-function Window:new(o)
-    o = o or { }
-    setmetatable(o, self)
-    self.__index = self
-    return o
-end
+Window.x=0
+Window.y=0
+Window.width=0
+Window.height=0
+Window.outer_width=0
+Window.outer_height=0
 
 function Window:set_size(outer_width, outer_height)
     self.outer_width = outer_width
