@@ -20,7 +20,7 @@ function OscillatorComponent:resize()
 end
 
 function OscillatorComponent:output()
-    return self.oscillator.sample()
+    return self.oscillator:sample()
 end
 
 table.insert(OscillatorComponent.outputs, OscillatorComponent:create_output(OscillatorComponent.output))

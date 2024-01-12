@@ -5,7 +5,8 @@ local WindowManager = require('ui.manager')
 local KeyboardSynth = require('audio.keyboard_synth')
 local Graph = require('ui.graph')
 local Oscillator = require('oscillators.oscillator')
-local osc = require('ui.components.oscillator'):new()
+local Osc = require('ui.components.oscillator')
+local osc = Osc:new()
 
 local left = Graph:new()
 
@@ -38,7 +39,6 @@ function love.load()
 
     left:load()
     left:set_size(love.graphics.getWidth() / 2 - 50, love.graphics.getHeight())
-    print('hey')
 
     KeyboardSynth:init()
     left:set_oscillator(KeyboardSynth.oscillator)
@@ -47,10 +47,11 @@ function love.load()
     WindowManager:add(osc)
 end
 
+
 function love.update(dt)
     KeyboardSynth:update(dt)
     WindowManager:update(dt)
-    --print(osc:output())
+    print(osc:output())
 end
 
 function love.draw()

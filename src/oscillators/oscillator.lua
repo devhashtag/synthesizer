@@ -3,7 +3,7 @@ local Oscillator = Object:new()
 
 Oscillator.n_sample = 0
 Oscillator.frequency = 440
-Oscillator.samplerate = 4410
+Oscillator.samplerate = 44100
 
 function Oscillator:set_note(note)
     self.frequency = 440.0 * 2^(note/12)

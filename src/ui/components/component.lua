@@ -10,6 +10,16 @@ function Component:create_output(output)
     end
 end
 
+function Component:input(i)
+    i = i or 1
+
+    if i < 0 or i > #self.inputs then
+        error('Component input is out of bounds', 1)
+    end
+
+    return function() return self.inputs[i] end
+end
+
 function Component:output(i)
     i = i or 1
 
