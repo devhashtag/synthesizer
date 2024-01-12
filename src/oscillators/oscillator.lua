@@ -1,3 +1,5 @@
+local Object = require('oop.object')
+
 local Oscillator = {
     n_sample = 0,
     frequency = 440,

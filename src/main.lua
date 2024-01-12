@@ -5,6 +5,7 @@ local WindowManager = require('ui.manager')
 local KeyboardSynth = require('audio.keyboard_synth')
 local Graph = require('ui.graph')
 local Oscillator = require('oscillators.oscillator')
+local osc = require('ui.components.oscillator'):new()
 
 local left = Graph:new()
 local right = Graph:new()
@@ -27,11 +28,14 @@ setmetatable(love, {__index = function(_, k)
     end
 end})
 
+
 function love.load()
     love.window.setMode(WIDTH, HEIGHT, {resizable=true})
 
     WindowManager.width = WIDTH
     WindowManager.height = HEIGHT
+
+    osc:set_size(200, 300)
 
     left:load()
     right:load()
@@ -44,13 +48,15 @@ function love.load()
     left:set_oscillator(KeyboardSynth.oscillator)
     right:set_oscillator(Oscillator:new())
 
-    WindowManager:add(left)
-    WindowManager:add(right)
+    --WindowManager:add(left)
+    --WindowManager:add(right)
+    WindowManager:add(osc)
 end
 
 function love.update(dt)
     KeyboardSynth:update(dt)
     WindowManager:update(dt)
+    --print(osc:output())
 end
 
 function love.draw()
