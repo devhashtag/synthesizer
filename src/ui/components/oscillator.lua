@@ -6,6 +6,14 @@ local OscillatorComponent = Component:new()
 OscillatorComponent.text = Text:new()
 OscillatorComponent.oscillator = Oscillator:new()
 
+function OscillatorComponent:new()
+    local oscillator = Component.new(self)
+
+    oscillator:create_output(oscillator.main_output)
+
+    return oscillator
+end
+
 function OscillatorComponent:draw()
     Component:draw()
 
@@ -19,10 +27,9 @@ function OscillatorComponent:resize()
     Component.resize(self)
 end
 
-function OscillatorComponent:output()
-    return self.oscillator:sample()
+function OscillatorComponent:main_output(n)
+    return self.oscillator:sample_at(n)
 end
 
-table.insert(OscillatorComponent.outputs, OscillatorComponent:create_output(OscillatorComponent.output))
 
 return OscillatorComponent

@@ -4,15 +4,20 @@ local HEIGHT = 500
 local WindowManager = require('ui.manager')
 local KeyboardSynth = require('audio.keyboard_synth')
 local Graph = require('ui.graph')
-local Oscillator = require('oscillators.oscillator')
 local Osc = require('ui.components.oscillator')
+local Audio = require('ui.components.audio')
+local Combinator = require('ui.components.combinator')
+
 local osc = Osc:new()
+local comb = Combinator:new()
+local audio = Audio:new()
 
-local left = Graph:new()
-
+-- Object for handling love events
+local main = { }
 
 -- List of all tables that will be notified of events
-local event_listeners = { left, KeyboardSynth, WindowManager }
+local event_listeners = { main, KeyboardSynth, WindowManager }
+
 
 
 -- Function that calls every table in event_listeners on every event
@@ -34,26 +39,31 @@ function love.load()
 
     WindowManager.width = WIDTH
     WindowManager.height = HEIGHT
+    WindowManager:add(osc)
+    WindowManager:add(audio)
+    WindowManager:add(comb)
 
-    osc:set_size(200, 300)
-
-    left:load()
-    left:set_size(love.graphics.getWidth() / 2 - 50, love.graphics.getHeight())
 
     KeyboardSynth:init()
-    left:set_oscillator(KeyboardSynth.oscillator)
+    osc:set_size(200, 300)
 
-    WindowManager:add(left)
-    WindowManager:add(osc)
+
+    comb:create_input(osc:output())
+    audio:create_input(comb:output())
 end
-
 
 function love.update(dt)
     KeyboardSynth:update(dt)
     WindowManager:update(dt)
-    print(osc:output())
+    audio:update(dt)
 end
 
 function love.draw()
     WindowManager:draw()
+end
+
+function main:keypressed(key)
+    if key == 'q' then
+        error()
+    end
 end
