@@ -43,6 +43,9 @@ function love.load()
     WindowManager:add(audio)
     WindowManager:add(comb)
 
+    audio.x = WIDTH - audio.outer_width
+    comb.x = WIDTH - comb.outer_width
+    comb.y = HEIGHT - comb.outer_height
 
     KeyboardSynth:init()
     osc:set_size(200, 300)

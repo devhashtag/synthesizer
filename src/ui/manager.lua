@@ -1,24 +1,24 @@
 local constants = require('constants.ui')
+local List = require('data_structures.linked_list')
 local Window = require('ui.window')
 local WindowManager = Window:new()
 
-WindowManager.windows = {}
+WindowManager.windows = List:new()
 WindowManager.drag = nil
 WindowManager._resize = nil
 
-
 function WindowManager:add(window)
-    table.insert(self.windows, window)
+    self.windows:prepend(window)
 end
 
 function WindowManager:update(dt)
-    for _, window in ipairs(self.windows) do
+    for window in self.windows:iter() do
         window:update()
     end
 end
 
 function WindowManager:mousepressed(x, y, button, istouch, presses)
-    for _, window in ipairs(self.windows) do
+    for window in self.windows:iter() do
         if button == 1 and window:in_bar(x, y) then
             self.drag = window
         end
@@ -51,7 +51,7 @@ function WindowManager:mousemoved(x, y, dx, dy, istouch)
 end
 
 function WindowManager:draw()
-    for _, window in ipairs(self.windows) do
+    for window in self.windows:iter() do
         -- Restrict canvas to the designated area for this window
         if not self:in_bounds(window) then
             return
@@ -61,6 +61,7 @@ function WindowManager:draw()
         self:draw_border(window)
         love.graphics.translate(constants.BORDER_THICKNESS, constants.BAR_HEIGHT)
         love.graphics.setScissor(window.x + constants.BORDER_THICKNESS, window.y + constants.BAR_HEIGHT, window.width, window.height)
+        love.graphics.clear()
         window:draw()
         love.graphics.setScissor()
         love.graphics.translate(-window.x - constants.BORDER_THICKNESS, -window.y - constants.BAR_HEIGHT)
@@ -89,7 +90,7 @@ end
 
 function WindowManager:keypressed(key)
     if key == 'r' then
-        for _, window in ipairs(self.windows) do
+        for window in self.windows:iter() do
             if not self:in_bounds(window) then
                 window.x = 100
                 window.y = 100
