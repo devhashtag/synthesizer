@@ -16,6 +16,12 @@ function WindowManager:focus_window(window)
     self.windows:prepend(window)
 end
 
+function WindowManager:get_focussed_window()
+    if self.windows.length > 0 then
+        return  self.windows:head()
+    end
+end
+
 function WindowManager:update(dt)
     for window in self.windows:iter() do
         window:update()
@@ -99,14 +105,15 @@ function WindowManager:in_bounds(window)
 end
 
 function WindowManager:keypressed(key)
-    if key == 'r' then
-        for window in self.windows:iter() do
-            if not self:in_bounds(window) then
-                window.x = 100
-                window.y = 100
-                break
-            end
-        end
+    local window = self:get_focussed_window()
+
+    if window == nil then
+        return
+    end
+
+    -- return if window has no keypressed method (it will default to the WindowManager's keypressed function)
+    if window.keypressed ~= nil then
+        window:keypressed(key)
     end
 end
 
