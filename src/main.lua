@@ -19,7 +19,6 @@ local main = { }
 local event_listeners = { main, KeyboardSynth, WindowManager }
 
 
-
 -- Function that calls every table in event_listeners on every event
 setmetatable(love, {__index = function(_, k)
     return function(...)
@@ -49,7 +48,6 @@ function love.load()
 
     KeyboardSynth:init()
     osc:set_size(200, 300)
-
 
     comb:create_input(osc:output())
     audio:create_input(comb:output())
