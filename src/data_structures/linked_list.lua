@@ -2,11 +2,20 @@ local Object = require('oop.object')
 local LinkedList = Object:new()
 
 LinkedList.list = nil
+LinkedList.tail = nil
 
 function LinkedList:prepend(value)
-    self.list = {value=value, next=self.list}
-end
+    local new = {value=value, next=self.list, prev = nil}
 
+    if self.list == nil then
+        self.list = new
+        self.tail = new
+        return
+    end
+
+    self.list.prev = new
+    self.list = new
+end
 
 -- Returns true if an element was removed, false otherwise
 function LinkedList:remove(value)
@@ -52,6 +61,18 @@ function LinkedList:iter()
         if element ~= nil then
             local value = element.value
             element = element.next
+            return value
+        end
+    end
+end
+
+function LinkedList:reverse_iter()
+    local element = self.tail
+
+    return function()
+        if element ~= nil then
+            local value = element.value
+            element = element.prev
             return value
         end
     end

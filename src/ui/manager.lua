@@ -11,6 +11,11 @@ function WindowManager:add(window)
     self.windows:prepend(window)
 end
 
+function WindowManager:focus_window(window)
+    self.windows:remove(window)
+    self.windows:prepend(window)
+end
+
 function WindowManager:update(dt)
     for window in self.windows:iter() do
         window:update()
@@ -21,10 +26,12 @@ function WindowManager:mousepressed(x, y, button, istouch, presses)
     for window in self.windows:iter() do
         if button == 1 and window:in_bar(x, y) then
             self.drag = window
+            self:focus_window(self.drag)
         end
 
         if button == 2 and window:in_window(x, y) then
             self._resize = window
+            self:focus_window(self._resize)
         end
     end
 end
@@ -41,6 +48,7 @@ function WindowManager:mousemoved(x, y, dx, dy, istouch)
     if self.drag then
         self.drag.x = self.drag.x + dx
         self.drag.y = self.drag.y + dy
+
     end
 
     if self._resize then
@@ -51,7 +59,9 @@ function WindowManager:mousemoved(x, y, dx, dy, istouch)
 end
 
 function WindowManager:draw()
-    for window in self.windows:iter() do
+    -- Draw in reverse because a higher index in the the window list 
+    -- means a higher priority (a.k.a z-index)
+    for window in self.windows:reverse_iter() do
         -- Restrict canvas to the designated area for this window
         if not self:in_bounds(window) then
             return
