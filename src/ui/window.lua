@@ -42,7 +42,7 @@ function Window:in_content(x, y)
 end
 
 function Window:in_bar(x, y)
-    return x > self.x and x < self.x + self.width and y > self.y and y < self.y + constants.BAR_HEIGHT
+    return x >= self.x and x <= self.x + self.width and y >= self.y and y <= self.y + constants.BAR_HEIGHT
 end
 
 function Window:in_window(x, y)
