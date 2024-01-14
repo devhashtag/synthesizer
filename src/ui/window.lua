@@ -38,7 +38,7 @@ function Window:resize()
 end
 
 function Window:in_content(x, y)
-    return x > self.x and x < self.x + self.width and y > self.y + constants.BAR_HEIGHT and y < self.y + constants.BAR_HEIGHT + self.height
+    return x >= self.x and x <= self.x + self.width and y >= self.y + constants.BAR_HEIGHT and y <= self.y + constants.BAR_HEIGHT + self.height
 end
 
 function Window:in_bar(x, y)
